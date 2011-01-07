@@ -4218,14 +4218,14 @@ void Spell::HandleThreatSpells(uint32 spellId)
     if(!m_targets.getUnitTarget()->CanHaveThreatList())
         return;
 
-    uint16 threat = sSpellMgr.GetSpellThreat(spellId);
+    SpellThreatEntry const* threatEntry = sSpellMgr.GetSpellThreatEntry(spellId);
 
-    if(!threat)
+    if(!threatEntry || !threatEntry->threat)
         return;
 
-    m_targets.getUnitTarget()->AddThreat(m_caster, float(threat), false, GetSpellSchoolMask(m_spellInfo), m_spellInfo);
+    m_targets.getUnitTarget()->AddThreat(m_caster, float(threatEntry->threat), false, GetSpellSchoolMask(m_spellInfo), m_spellInfo);
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u, rank %u, added an additional %i threat", spellId, sSpellMgr.GetSpellRank(spellId), threat);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u, rank %u, added an additional %i threat", spellId, sSpellMgr.GetSpellRank(spellId), threatEntry->threat);
 }
 
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,SpellEffectIndex i, float DamageMultiplier)

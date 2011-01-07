@@ -24,6 +24,7 @@
 #include "Player.h"
 #include "ObjectAccessor.h"
 #include "UnitEvents.h"
+#include "SpellMgr.h"
 
 //==============================================================
 //================= ThreatCalcHelper ===========================
@@ -38,11 +39,21 @@ float ThreatCalcHelper::calcThreat(Unit* pHatedUnit, Unit* /*pHatingUnit*/, floa
 
     if (pThreatSpell)
     {
+        SpellThreatEntry const* threatEntry = sSpellMgr.GetSpellThreatEntry(pThreatSpell->Id);
+
         if (Player* modOwner = pHatedUnit->GetSpellModOwner())
+        {
             modOwner->ApplySpellMod(pThreatSpell->Id, SPELLMOD_THREAT, pThreat);
 
-        if(crit)
+            if(threatEntry && threatEntry->ap_multiplier)
+                pThreat += modOwner->CalculateDamage(BASE_ATTACK, false) * threatEntry->ap_multiplier;
+        }
+
+        if (crit)
             pThreat *= pHatedUnit->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRITICAL_THREAT,schoolMask);
+
+        if (threatEntry)
+            pThreat *= threatEntry->multiplier;
     }
 
     float threat = pHatedUnit->ApplyTotalThreatModifier(pThreat, schoolMask);
